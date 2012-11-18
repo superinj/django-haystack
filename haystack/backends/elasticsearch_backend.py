@@ -230,7 +230,7 @@ class ElasticsearchSearchBackend(BaseSearchBackend):
 
     def build_search_kwargs(self, query_string, sort_by=None, start_offset=0, end_offset=None,
                             fields='', highlight=False, facets=None,
-                            date_facets=None, query_facets=None,
+                            date_facets=None, range_facets=None, query_facets=None,
                             narrow_queries=None, spelling_query=None,
                             within=None, dwithin=None, distance_point=None,
                             models=None, limit_to_registered_models=None,
@@ -349,6 +349,25 @@ class ElasticsearchSearchBackend(BaseSearchBackend):
                                 'from': self.conn.from_python(value.get('start_date')),
                                 'to': self.conn.from_python(value.get('end_date')),
                             }
+                        }
+                    }
+                }
+
+        if range_facets is not None:
+            kwargs.setdefault('facets', {})
+
+            for facet_fieldname, value in range_facets.items():
+                kwargs['facets'][facet_fieldname] = {
+                    'histogram': {
+                        'field': facet_fieldname,
+                        'interval': value.get('gap_amount', 10),
+                        },
+                    'facet_filter': {
+                        "range": {
+                            facet_fieldname: {
+                                'from': self.conn.from_python(value.get('start')),
+                                'to': self.conn.from_python(value.get('end')),
+                                }
                         }
                     }
                 }
@@ -795,6 +814,9 @@ class ElasticsearchSearchQuery(BaseSearchQuery):
 
         if self.date_facets:
             search_kwargs['date_facets'] = self.date_facets
+
+        if self.range_facets:
+            search_kwargs['range_facets'] = self.range_facets
 
         if self.distance_point:
             search_kwargs['distance_point'] = self.distance_point

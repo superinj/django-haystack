@@ -293,6 +293,7 @@ class BaseSearchQuery(object):
         self.highlight = False
         self.facets = set()
         self.date_facets = {}
+        self.range_facets = {}
         self.query_facets = []
         self.narrow_queries = set()
         #: If defined, fields should be a list of field names - no other values
@@ -744,6 +745,17 @@ class BaseSearchQuery(object):
             'gap_amount': gap_amount,
         }
         self.date_facets[connections[self._using].get_unified_index().get_facet_fieldname(field)] = details
+
+    def add_range_facet(self, field, start, end, gap_amount=10):
+        """Adds a range-based facet on a field."""
+        from haystack import connections
+
+        details = {
+            'start': start,
+            'end': end,
+            'gap_amount': gap_amount,
+            }
+        self.range_facets[connections[self._using].get_unified_index().get_facet_fieldname(field)] = details
 
     def add_query_facet(self, field, query):
         """Adds a query facet on a field."""
