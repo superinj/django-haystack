@@ -560,12 +560,15 @@ class ElasticsearchSearchBackend(BaseSearchBackend):
             facets = {
                 'fields': {},
                 'dates': {},
+                'ranges': {},
                 'queries': {},
             }
 
             for facet_fieldname, facet_info in raw_results['facets'].items():
                 if facet_info.get('_type', 'terms') == 'terms':
                     facets['fields'][facet_fieldname] = [(individual['term'], individual['count']) for individual in facet_info['terms']]
+                elif facet_info.get('_type', 'terms') == 'histogram':
+                    facets['ranges'][facet_fieldname] = [(individual['term'], individual['count']) for individual in facet_info['entries']]
                 elif facet_info.get('_type', 'terms') == 'date_histogram':
                     # Elasticsearch provides UTC timestamps with an extra three
                     # decimals of precision, which datetime barfs on.
