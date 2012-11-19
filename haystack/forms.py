@@ -65,6 +65,7 @@ class HighlightedSearchForm(SearchForm):
 class FacetedSearchForm(SearchForm):
     def __init__(self, *args, **kwargs):
         self.selected_facets = kwargs.pop("selected_facets", [])
+        self.selected_ranges = kwargs.pop("selected_ranges", [])
         super(FacetedSearchForm, self).__init__(*args, **kwargs)
 
     def search(self):
@@ -80,6 +81,16 @@ class FacetedSearchForm(SearchForm):
 
             if value:
                 sqs = sqs.narrow(u'%s:"%s"' % (field, sqs.query.clean(value)))
+
+        for facet in self.selected_ranges:
+            if ":" not in facet:
+                continue
+
+            field, value = facet.split(":", 1)
+            start, end = value.split(",", 1)
+
+            if value:
+                sqs = sqs.narrow(u'%s:"[%s TO %s]"' % (field, sqs.query.clean(start), sqs.query.clean(end)))
 
         return sqs
 
@@ -111,11 +122,15 @@ class HighlightedModelSearchForm(ModelSearchForm):
 
 class FacetedModelSearchForm(ModelSearchForm):
     selected_facets = forms.CharField(required=False, widget=forms.HiddenInput)
+    selected_ranges = forms.CharField(required=False, widget=forms.HiddenInput)
 
     def search(self):
         sqs = super(FacetedModelSearchForm, self).search()
 
         if hasattr(self, 'cleaned_data') and self.cleaned_data['selected_facets']:
             sqs = sqs.narrow(self.cleaned_data['selected_facets'])
+
+        if hasattr(self, 'cleaned_data') and self.cleaned_data['selected_ranges']:
+            sqs = sqs.narrow(self.cleaned_data['selected_ranges'])
 
         return sqs.models(*self.get_models())

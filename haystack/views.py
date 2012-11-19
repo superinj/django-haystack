@@ -167,6 +167,7 @@ class FacetedSearchView(SearchView):
         # This way the form can always receive a list containing zero or more
         # facet expressions:
         form_kwargs['selected_facets'] = self.request.GET.getlist("selected_facets")
+        form_kwargs['selected_ranges'] = self.request.GET.getlist("selected_ranges")
 
         return super(FacetedSearchView, self).build_form(form_kwargs)
 

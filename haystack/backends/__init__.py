@@ -120,7 +120,7 @@ class BaseSearchBackend(object):
 
     def build_search_kwargs(self, query_string, sort_by=None, start_offset=0, end_offset=None,
                             fields='', highlight=False, facets=None,
-                            date_facets=None, query_facets=None,
+                            date_facets=None, range_facets=None, query_facets=None,
                             narrow_queries=None, spelling_query=None,
                             within=None, dwithin=None, distance_point=None,
                             models=None, limit_to_registered_models=None,
@@ -359,6 +359,9 @@ class BaseSearchQuery(object):
 
         if self.date_facets:
             kwargs['date_facets'] = self.date_facets
+
+        if self.range_facets:
+            kwargs['range_facets'] = self.range_facets
 
         if self.query_facets:
             kwargs['query_facets'] = self.query_facets
@@ -839,6 +842,7 @@ class BaseSearchQuery(object):
         clone.highlight = self.highlight
         clone.facets = self.facets.copy()
         clone.date_facets = self.date_facets.copy()
+        clone.range_facets = self.range_facets.copy()
         clone.query_facets = self.query_facets[:]
         clone.narrow_queries = self.narrow_queries.copy()
         clone.start_offset = self.start_offset
