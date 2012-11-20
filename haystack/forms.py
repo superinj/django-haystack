@@ -90,7 +90,7 @@ class FacetedSearchForm(SearchForm):
             start, end = value.split(",", 1)
 
             if value:
-                sqs = sqs.narrow(u'%s:"[%s TO %s]"' % (field, sqs.query.clean(start), sqs.query.clean(end)))
+                sqs = sqs.narrow(u'%s:[%s TO %s]' % (field, sqs.query.clean(start), sqs.query.clean(end)))
 
         return sqs
 
